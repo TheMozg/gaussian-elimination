@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace CM1
@@ -99,6 +100,84 @@ namespace CM1
             Console.WriteLine("Gaussian elimination with partial pivoting");
             Console.WriteLine("Fedor Kalugin, P3210");
             Console.WriteLine();
+
+            Console.WriteLine("Enter the number of action and press [Enter]. Then follow instructions.");
+            bool exit = false;
+            while (!exit)
+            {
+                try
+                {
+                    Console.WriteLine("Menu:\n1. Load matrix\n2. Input matrix\n3. Generate matrix\n4. Exit");
+                    int choice = getValidatedInt(new List<int> { 1, 2, 3, 4 });
+                    switch (choice)
+                    {
+                        case 1:
+                            Load();
+                            break;
+                        case 2:
+                            Input();
+                            break;
+                        case 3:
+                            Gen();
+                            break;
+                        case 4:
+                            exit = true;
+                            break;
+                    }
+                }
+                catch (AggregateException ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
+        }
+        static int getValidatedInt(List<int> options)
+        {
+            int res = 0;
+            for (;;)
+            {
+                Console.Write("> ");
+                if (Int32.TryParse(Console.ReadLine(), out res))
+                {
+                    if (options.Contains(res))
+                        break;
+                }
+                Console.WriteLine("Please enter valid NUMBER.");
+            }
+            return res;
+        }
+        static void Gen()
+        {
+            Console.WriteLine("Enter matrix size (up to 20)");
+            var list = new List<int>();
+            for (int i = 1; i <= 20; i++)
+                list.Add(i);
+            int size = getValidatedInt(list);
+            double[,] matrix = new double[size, size + 1];
+
+            int rowCount = size;
+            int colCount = size + 1;
+            Random rnd = new Random();
+            for (int row = 0; row < rowCount; row++)
+            {
+                for (int col = 0; col < colCount; col++)
+                {
+                    matrix[row, col] = rnd.Next(0, 10);
+                }
+            }
+            DoMatrix(matrix);
+        }
+        static void Input()
+        {
+            double[,] matrix = ReadInput();
+            DoMatrix(matrix);
+        }
+        static void Load()
+        {
             Console.WriteLine("Looking for 'input.txt' file");
             while (!File.Exists("input.txt"))
             {
@@ -107,7 +186,14 @@ namespace CM1
             }
             Console.WriteLine("Reading file. Hope it's well formatted");
             MatrixSolver les = new MatrixSolver();
-            les.Matrix = ReadFile("input.txt");
+            double[,] matrix = ReadFile("input.txt");
+            DoMatrix(matrix);
+        }
+
+        static void DoMatrix(double[,] matrix)
+        {
+            MatrixSolver les = new MatrixSolver();
+            les.Matrix = matrix;
             Console.WriteLine("Input matrix:");
             PrintMatrix(les.Matrix);
             les.DoElimination();
@@ -130,9 +216,8 @@ namespace CM1
                 Console.WriteLine("Sorry, there is no unique solution");
             }
             Console.WriteLine();
-            Console.ReadLine();
-
         }
+
         static double[,] ReadFile(string path)
         {
             if (!File.Exists(path))
@@ -144,6 +229,29 @@ namespace CM1
             for (int row = 0; row < rowCount; row++)
             {
                 string[] words = lines[row].Split(' ');
+                for (int col = 0; col < colCount; col++)
+                {
+                    matrix[row, col] = double.Parse(words[col]);
+                }
+            }
+            return matrix;
+        }
+        static double[,] ReadInput()
+        {
+            Console.WriteLine("Enter matrix size (up to 20)");
+            var list = new List<int>();
+            for (int i = 1; i <= 20; i++)
+                list.Add(i);
+            int size = getValidatedInt(list);
+            double[,] matrix = new double[size, size+1];
+
+            int rowCount = size;
+            int colCount = size+1;
+            for (int row = 0; row < rowCount; row++)
+            {
+                Console.WriteLine("Row {0}: input {1} space separated numbers", row+1, size+1);
+                string line = Console.ReadLine();
+                string[] words = line.Split(' ');
                 for (int col = 0; col < colCount; col++)
                 {
                     matrix[row, col] = double.Parse(words[col]);
