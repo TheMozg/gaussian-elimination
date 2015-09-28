@@ -47,9 +47,12 @@ namespace CM1
                 DoPartialPivoting(sourceRow);
                 for (int destRow = sourceRow + 1; destRow < RowCount; destRow++)
                 {
-                    double multiplier = M[destRow, sourceRow] / M[sourceRow, sourceRow];
-                    for (int col = 0; col < RowCount + 1; col++)
-                        M[destRow, col] -= M[sourceRow, col] * multiplier;
+                    if (M[sourceRow, sourceRow] != 0)
+                    {
+                        double multiplier = M[destRow, sourceRow] / M[sourceRow, sourceRow];
+                        for (int col = 0; col < RowCount + 1; col++)
+                            M[destRow, col] -= M[sourceRow, col] * multiplier;
+                    }
                 }
             }
         }
@@ -87,7 +90,6 @@ namespace CM1
                 d *= M[row, row];
             return d;
         }
-
     }
 
     class CLI
